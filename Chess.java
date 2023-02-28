@@ -23,5 +23,7 @@ public class Chess {
         };
 
         SwingUtilities.invokeLater(app);
+
+        
     }
 }
