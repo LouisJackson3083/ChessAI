@@ -22,6 +22,7 @@ public class Board {
     public char[][] chessBoardPieces = new char[8][8];
     private JPanel chessBoard;
     private Image[][] chessPieceImages = new Image[2][6]; // Stores the images
+    private int[] enpassant = new int[2];
 
     // Used for displaying/translating a piece letter to it's image index
     public HashMap<Character, Integer> pieceValue = new HashMap<Character, Integer>() {{
@@ -57,7 +58,6 @@ public class Board {
     private static Color colHighlight2 = new Color(255,179,179); 
     
     // Moves
-    // public int[][] legalMoves = new int[0][2];
     List<int[]> legalMoves = new ArrayList<int[]>();
     
     Board() {
@@ -82,8 +82,12 @@ public class Board {
         JButton toolsNew = new JButton("New");
         toolsNew.addActionListener(actionNewGame);
         tools.add(toolsNew);
-
-        tools.add(new JButton("Save"));
+        
+        // Create save game button
+        JButton toolSave = new JButton("Save");
+        toolSave.addActionListener(actionNewGame);
+        tools.add(toolSave);
+        
         tools.add(new JButton("Restore"));
         tools.addSeparator();
         tools.add(new JButton("Resign"));
@@ -197,7 +201,7 @@ public class Board {
 
     private final void setupNewGame() {
         String newGameMessage = "loaded FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
+        newGameMessage = newGameMessage + ((turn) ? " WHITE's turn" : " BLACK's turn");
         message.setText(newGameMessage);
 
         // FEN BASICS
@@ -210,10 +214,26 @@ public class Board {
         int pieceColour = (Character.isUpperCase(currentChar)) ? black : white;
         if (pieceColour == 0) { if (turn) {return;} }
         else { if (!turn) {return;} }
+        char pieceType = Character.toLowerCase(currentChar);
+        int pieceTypeInt = pieceLetterToImageIndex.get(pieceType);
 
-        int pieceType = pieceLetterToImageIndex.get(Character.toLowerCase(currentChar));
 
-        chessBoardButtons[j2][i2].setIcon(new ImageIcon(chessPieceImages[pieceColour][pieceType]));
+        
+        // En passant is a little weird so we need to check if this is a en passant move and then adjust display
+        if (enpassant[1] == i1) {
+            chessBoardButtons[enpassant[0]][i1].setIcon(null);
+            chessBoardPieces[enpassant[0]][i1] = ' ';
+        }
+        if (pieceType == 'p' && Math.abs(i1-i2) == 2) {
+            enpassant[0] = j2;
+            enpassant[1] = i2;
+        }
+        else {
+            enpassant[0] = 0;
+            enpassant[1] = 0;
+        }
+
+        chessBoardButtons[j2][i2].setIcon(new ImageIcon(chessPieceImages[pieceColour][pieceTypeInt]));
         chessBoardPieces[j2][i2] = currentChar;
         chessBoardButtons[j1][i1].setIcon(null);
         chessBoardPieces[j1][i1] = ' ';
@@ -244,12 +264,16 @@ public class Board {
                 if (chessBoardPieces[j][i-1] == ' ') {legalMoves.add(new int[] { j, i-1 });}
                 if (j+1<=7 && chessBoardPieces[j+1][i-1] != ' ' && isOppositePiece(pieceColour,j+1,i-1)) {legalMoves.add(new int[] { j+1, i-1 });}
                 if (j-1>=0 && chessBoardPieces[j-1][i-1] != ' ' && isOppositePiece(pieceColour,j-1,i-1)) {legalMoves.add(new int[] { j-1, i-1 });}
+                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {legalMoves.add(new int[] { j+1, i-1 });} // EN PASSANT!
+                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {legalMoves.add(new int[] { j-1, i-1 });}
             }
             else {
                 if (i == 1 &&  chessBoardPieces[j][i+2] == ' ') {legalMoves.add(new int[] { j, i+2 });}
                 if (chessBoardPieces[j][i+1] == ' ') {legalMoves.add(new int[] { j, i+1 });}
                 if (j+1<=7 && chessBoardPieces[j+1][i+1] != ' ' && isOppositePiece(pieceColour,j+1,i+1)) {legalMoves.add(new int[] { j+1, i+1 });}
                 if (j+1>=0 && chessBoardPieces[j-1][i+1] != ' ' && isOppositePiece(pieceColour,j-1,i+1)) {legalMoves.add(new int[] { j-1, i+1 });}
+                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {legalMoves.add(new int[] { j+1, i+1 });} // EN PASSANT!
+                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {legalMoves.add(new int[] { j-1, i+1 });}
             }
         }
         else if (pieceType == 'r') { // if a rook
