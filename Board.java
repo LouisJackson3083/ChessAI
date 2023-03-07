@@ -59,6 +59,7 @@ public class Board {
     
     // Moves
     List<int[]> legalMoves = new ArrayList<int[]>();
+    List<int[]> pseudoLegalMoves = new ArrayList<int[]>();
     
     Board() {
         initializeBoard();
@@ -209,8 +210,8 @@ public class Board {
         loadFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
-    public final void movePiece(int j1, int i1, int j2, int i2) {
-        char currentChar = chessBoardPieces[j1][i1];
+    public final void movePiece(char[][] chessBoard, int j1, int i1, int j2, int i2) {
+        char currentChar = chessBoard[j1][i1];
         int pieceColour = (Character.isUpperCase(currentChar)) ? black : white;
         if (pieceColour == 0) { if (turn) {return;} }
         else { if (!turn) {return;} }
@@ -222,7 +223,7 @@ public class Board {
         // En passant is a little weird so we need to check if this is a en passant move and then adjust display
         if (enpassant[1] == i1) {
             chessBoardButtons[enpassant[0]][i1].setIcon(null);
-            chessBoardPieces[enpassant[0]][i1] = ' ';
+            chessBoard[enpassant[0]][i1] = ' ';
         }
         if (pieceType == 'p' && Math.abs(i1-i2) == 2) {
             enpassant[0] = j2;
@@ -234,9 +235,9 @@ public class Board {
         }
 
         chessBoardButtons[j2][i2].setIcon(new ImageIcon(chessPieceImages[pieceColour][pieceTypeInt]));
-        chessBoardPieces[j2][i2] = currentChar;
+        chessBoard[j2][i2] = currentChar;
         chessBoardButtons[j1][i1].setIcon(null);
-        chessBoardPieces[j1][i1] = ' ';
+        chessBoard[j1][i1] = ' ';
 
         turn = !turn;
         if (!turn) {message.setText("BLACK's turn.");}
@@ -253,6 +254,7 @@ public class Board {
     }
     
     public final void generateMoves(int j, int i) {
+        pseudoLegalMoves.clear();
         char currentChar = chessBoardPieces[j][i];
         int pieceColour = (Character.isUpperCase(currentChar)) ? black : white;
         char pieceType = Character.toLowerCase(currentChar);
@@ -260,20 +262,20 @@ public class Board {
         
         if (pieceType == 'p') { // if a pawn
             if (pieceColour == black) {
-                if (i == 6 &&  chessBoardPieces[j][i-2] == ' ') {legalMoves.add(new int[] { j, i-2 });}
-                if (chessBoardPieces[j][i-1] == ' ') {legalMoves.add(new int[] { j, i-1 });}
-                if (j+1<=7 && chessBoardPieces[j+1][i-1] != ' ' && isOppositePiece(pieceColour,j+1,i-1)) {legalMoves.add(new int[] { j+1, i-1 });}
-                if (j-1>=0 && chessBoardPieces[j-1][i-1] != ' ' && isOppositePiece(pieceColour,j-1,i-1)) {legalMoves.add(new int[] { j-1, i-1 });}
-                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {legalMoves.add(new int[] { j+1, i-1 });} // EN PASSANT!
-                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {legalMoves.add(new int[] { j-1, i-1 });}
+                if (i == 6 &&  chessBoardPieces[j][i-2] == ' ') {pseudoLegalMoves.add(new int[] { j, i-2 });}
+                if (chessBoardPieces[j][i-1] == ' ') {pseudoLegalMoves.add(new int[] { j, i-1 });}
+                if (j+1<=7 && chessBoardPieces[j+1][i-1] != ' ' && isOppositePiece(pieceColour,j+1,i-1)) {pseudoLegalMoves.add(new int[] { j+1, i-1 });}
+                if (j-1>=0 && chessBoardPieces[j-1][i-1] != ' ' && isOppositePiece(pieceColour,j-1,i-1)) {pseudoLegalMoves.add(new int[] { j-1, i-1 });}
+                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {pseudoLegalMoves.add(new int[] { j+1, i-1 });} // EN PASSANT!
+                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {pseudoLegalMoves.add(new int[] { j-1, i-1 });}
             }
             else {
-                if (i == 1 &&  chessBoardPieces[j][i+2] == ' ') {legalMoves.add(new int[] { j, i+2 });}
-                if (chessBoardPieces[j][i+1] == ' ') {legalMoves.add(new int[] { j, i+1 });}
-                if (j+1<=7 && chessBoardPieces[j+1][i+1] != ' ' && isOppositePiece(pieceColour,j+1,i+1)) {legalMoves.add(new int[] { j+1, i+1 });}
-                if (j+1>=0 && chessBoardPieces[j-1][i+1] != ' ' && isOppositePiece(pieceColour,j-1,i+1)) {legalMoves.add(new int[] { j-1, i+1 });}
-                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {legalMoves.add(new int[] { j+1, i+1 });} // EN PASSANT!
-                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {legalMoves.add(new int[] { j-1, i+1 });}
+                if (i == 1 &&  chessBoardPieces[j][i+2] == ' ') {pseudoLegalMoves.add(new int[] { j, i+2 });}
+                if (chessBoardPieces[j][i+1] == ' ') {pseudoLegalMoves.add(new int[] { j, i+1 });}
+                if (j+1<=7 && chessBoardPieces[j+1][i+1] != ' ' && isOppositePiece(pieceColour,j+1,i+1)) {pseudoLegalMoves.add(new int[] { j+1, i+1 });}
+                if (j+1>=0 && chessBoardPieces[j-1][i+1] != ' ' && isOppositePiece(pieceColour,j-1,i+1)) {pseudoLegalMoves.add(new int[] { j-1, i+1 });}
+                if (enpassant[1]==i && j+1<=7 && enpassant[0]==j+1) {pseudoLegalMoves.add(new int[] { j+1, i+1 });} // EN PASSANT!
+                if (enpassant[1]==i && j-1>=0 && enpassant[0]==j-1) {pseudoLegalMoves.add(new int[] { j-1, i+1 });}
             }
         }
         else if (pieceType == 'r') { // if a rook
@@ -281,40 +283,40 @@ public class Board {
             for (int k = 1; k < 8; k++) {
                 if (north && i-k>=0) { // Check the north squares
                     if (chessBoardPieces[j][i-k] == ' '){
-                        legalMoves.add(new int[] { j, i-k });
+                        pseudoLegalMoves.add(new int[] { j, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j,i-k)) {
-                        legalMoves.add(new int[] { j, i-k });
+                        pseudoLegalMoves.add(new int[] { j, i-k });
                         north = false;
                     }
                     else {north = false;}
                 }
                 if (south && i+k<=7) { // check the south squares
                     if (chessBoardPieces[j][i+k] == ' '){
-                        legalMoves.add(new int[] { j, i+k });
+                        pseudoLegalMoves.add(new int[] { j, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j,i+k)) {
-                        legalMoves.add(new int[] { j, i+k });
+                        pseudoLegalMoves.add(new int[] { j, i+k });
                         south = false;
                     }
                     else {south = false;}
                 }
                 if (west && j-k>=0) { // check the west squares
                     if (chessBoardPieces[j-k][i] == ' '){
-                        legalMoves.add(new int[] { j-k, i });
+                        pseudoLegalMoves.add(new int[] { j-k, i });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i)) {
-                        legalMoves.add(new int[] { j-k, i });
+                        pseudoLegalMoves.add(new int[] { j-k, i });
                         west = false;
                     }
                     else {west = false;}
                 }
                 if (east && j+k<=7) { // check the east squares
                     if (chessBoardPieces[j+k][i] == ' '){
-                        legalMoves.add(new int[] { j+k, i });
+                        pseudoLegalMoves.add(new int[] { j+k, i });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i)) {
-                        legalMoves.add(new int[] { j+k, i });
+                        pseudoLegalMoves.add(new int[] { j+k, i });
                         east = false;
                     }
                     else {east = false;}
@@ -326,40 +328,40 @@ public class Board {
             for (int k = 1; k < 8; k++) {
                 if (nw && j-k>=0 && i-k>=0) { // Check the north west squares
                     if (chessBoardPieces[j-k][i-k] == ' '){
-                        legalMoves.add(new int[] { j-k, i-k });
+                        pseudoLegalMoves.add(new int[] { j-k, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i-k)) {
-                        legalMoves.add(new int[] { j-k, i-k });
+                        pseudoLegalMoves.add(new int[] { j-k, i-k });
                         nw = false;
                     }
                     else {nw = false;}
                 }
                 if (ne && j+k<=7 && i-k>=0) { // Check the north east squares
                     if (chessBoardPieces[j+k][i-k] == ' '){
-                        legalMoves.add(new int[] { j+k, i-k });
+                        pseudoLegalMoves.add(new int[] { j+k, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i-k)) {
-                        legalMoves.add(new int[] { j+k, i-k });
+                        pseudoLegalMoves.add(new int[] { j+k, i-k });
                         ne = false;
                     }
                     else {ne = false;}
                 }
                 if (sw && j-k>=0 && i+k<=7) { // Check the south west squares
                     if (chessBoardPieces[j-k][i+k] == ' '){
-                        legalMoves.add(new int[] { j-k, i+k });
+                        pseudoLegalMoves.add(new int[] { j-k, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i+k)) {
-                        legalMoves.add(new int[] { j-k, i+k });
+                        pseudoLegalMoves.add(new int[] { j-k, i+k });
                         sw = false;
                     }
                     else {sw = false;}
                 }
                 if (se && j+k<=7 && i+k<=7) { // Check the south east squares
                     if (chessBoardPieces[j+k][i+k] == ' '){
-                        legalMoves.add(new int[] { j+k, i+k });
+                        pseudoLegalMoves.add(new int[] { j+k, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i+k)) {
-                        legalMoves.add(new int[] { j+k, i+k });
+                        pseudoLegalMoves.add(new int[] { j+k, i+k });
                         se = false;
                     }
                     else {se = false;}
@@ -371,80 +373,80 @@ public class Board {
             for (int k = 1; k < 8; k++) {
                 if (north && i-k>=0) { // Check the north squares
                     if (chessBoardPieces[j][i-k] == ' '){
-                        legalMoves.add(new int[] { j, i-k });
+                        pseudoLegalMoves.add(new int[] { j, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j,i-k)) {
-                        legalMoves.add(new int[] { j, i-k });
+                        pseudoLegalMoves.add(new int[] { j, i-k });
                         north = false;
                     }
                     else {north = false;}
                 }
                 if (south && i+k<=7) { // check the south squares
                     if (chessBoardPieces[j][i+k] == ' '){
-                        legalMoves.add(new int[] { j, i+k });
+                        pseudoLegalMoves.add(new int[] { j, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j,i+k)) {
-                        legalMoves.add(new int[] { j, i+k });
+                        pseudoLegalMoves.add(new int[] { j, i+k });
                         south = false;
                     }
                     else {south = false;}
                 }
                 if (west && j-k>=0) { // check the west squares
                     if (chessBoardPieces[j-k][i] == ' '){
-                        legalMoves.add(new int[] { j-k, i });
+                        pseudoLegalMoves.add(new int[] { j-k, i });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i)) {
-                        legalMoves.add(new int[] { j-k, i });
+                        pseudoLegalMoves.add(new int[] { j-k, i });
                         west = false;
                     }
                     else {west = false;}
                 }
                 if (east && j+k<=7) { // check the east squares
                     if (chessBoardPieces[j+k][i] == ' '){
-                        legalMoves.add(new int[] { j+k, i });
+                        pseudoLegalMoves.add(new int[] { j+k, i });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i)) {
-                        legalMoves.add(new int[] { j+k, i });
+                        pseudoLegalMoves.add(new int[] { j+k, i });
                         east = false;
                     }
                     else {east = false;}
                 }
                 if (nw && j-k>=0 && i-k>=0) { // Check the north west squares
                     if (chessBoardPieces[j-k][i-k] == ' '){
-                        legalMoves.add(new int[] { j-k, i-k });
+                        pseudoLegalMoves.add(new int[] { j-k, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i-k)) {
-                        legalMoves.add(new int[] { j-k, i-k });
+                        pseudoLegalMoves.add(new int[] { j-k, i-k });
                         nw = false;
                     }
                     else {nw = false;}
                 }
                 if (ne && j+k<=7 && i-k>=0) { // Check the north east squares
                     if (chessBoardPieces[j+k][i-k] == ' '){
-                        legalMoves.add(new int[] { j+k, i-k });
+                        pseudoLegalMoves.add(new int[] { j+k, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i-k)) {
-                        legalMoves.add(new int[] { j+k, i-k });
+                        pseudoLegalMoves.add(new int[] { j+k, i-k });
                         ne = false;
                     }
                     else {ne = false;}
                 }
                 if (sw && j-k>=0 && i+k<=7) { // Check the south west squares
                     if (chessBoardPieces[j-k][i+k] == ' '){
-                        legalMoves.add(new int[] { j-k, i+k });
+                        pseudoLegalMoves.add(new int[] { j-k, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i+k)) {
-                        legalMoves.add(new int[] { j-k, i+k });
+                        pseudoLegalMoves.add(new int[] { j-k, i+k });
                         sw = false;
                     }
                     else {sw = false;}
                 }
                 if (se && j+k<=7 && i+k<=7) { // Check the south east squares
                     if (chessBoardPieces[j+k][i+k] == ' '){
-                        legalMoves.add(new int[] { j+k, i+k });
+                        pseudoLegalMoves.add(new int[] { j+k, i+k });
                     }
                     else if (isOppositePiece(pieceColour,j+k,i+k)) {
-                        legalMoves.add(new int[] { j+k, i+k });
+                        pseudoLegalMoves.add(new int[] { j+k, i+k });
                         se = false;
                     }
                     else {se = false;}
@@ -454,55 +456,60 @@ public class Board {
         else if (pieceType == 'k') { // if a king
 
             if (i-1>=0 && j-1>=0 && (chessBoardPieces[j-1][i-1] == ' ' || isOppositePiece(pieceColour,j-1,i-1))){ // nw
-                legalMoves.add(new int[] { j-1, i-1 });
+                pseudoLegalMoves.add(new int[] { j-1, i-1 });
             }
             if (i-1>=0 && (chessBoardPieces[j][i-1] == ' ' || isOppositePiece(pieceColour,j,i-1))){ // n
-                legalMoves.add(new int[] { j, i-1 });
+                pseudoLegalMoves.add(new int[] { j, i-1 });
             }
             if (i-1>=0 && j+1<=7 && (chessBoardPieces[j+1][i-1] == ' ' || isOppositePiece(pieceColour,j+1,i-1))){ // ne
-                legalMoves.add(new int[] { j+1, i-1 });
+                pseudoLegalMoves.add(new int[] { j+1, i-1 });
             }
             if (j+1<=7 && (chessBoardPieces[j+1][i] == ' ' || isOppositePiece(pieceColour,j+1,i))){ // e
-                legalMoves.add(new int[] { j+1, i });
+                pseudoLegalMoves.add(new int[] { j+1, i });
             }
             if (i+1<=7 && j+1<=7 && (chessBoardPieces[j+1][i+1] == ' ' || isOppositePiece(pieceColour,j+1,i+1))){ // se
-                legalMoves.add(new int[] { j+1, i+1 });
+                pseudoLegalMoves.add(new int[] { j+1, i+1 });
             }
             if (i+1<=7 && (chessBoardPieces[j][i+1] == ' ' || isOppositePiece(pieceColour,j,i+1))){ // s
-                legalMoves.add(new int[] { j, i+1 });
+                pseudoLegalMoves.add(new int[] { j, i+1 });
             }
             if (i+1<=7 && j-1>=0 && (chessBoardPieces[j-1][i+1] == ' ' || isOppositePiece(pieceColour,j-1,i+1))){ // sw
-                legalMoves.add(new int[] { j-1, i+1 });
+                pseudoLegalMoves.add(new int[] { j-1, i+1 });
             }
             if (j-1>=0 && (chessBoardPieces[j-1][i] == ' ' || isOppositePiece(pieceColour,j-1,i))){ // w
-                legalMoves.add(new int[] { j-1, i });
+                pseudoLegalMoves.add(new int[] { j-1, i });
             }
         }
         else if (pieceType == 'n') { // if a knight
             if (i-2>=0 && j-1>=0 && (chessBoardPieces[j-1][i-2] == ' ' || isOppositePiece(pieceColour,j-1,i-2))){ // nw
-                legalMoves.add(new int[] { j-1, i-2 });
+                pseudoLegalMoves.add(new int[] { j-1, i-2 });
             }
             if (i-2>=0 && j+1<=7 && (chessBoardPieces[j+1][i-2] == ' ' || isOppositePiece(pieceColour,j+1,i-2))){ // ne
-                legalMoves.add(new int[] { j+1, i-2 });
+                pseudoLegalMoves.add(new int[] { j+1, i-2 });
             }
             if (i-1>=0 && j+2<=7 && (chessBoardPieces[j+2][i-1] == ' ' || isOppositePiece(pieceColour,j+2,i-1))){ // en
-                legalMoves.add(new int[] { j+2, i-1 });
+                pseudoLegalMoves.add(new int[] { j+2, i-1 });
             }
             if (i+1<=7 && j+2<=7 && (chessBoardPieces[j+2][i+1] == ' ' || isOppositePiece(pieceColour,j+2,i+1))){ // es
-                legalMoves.add(new int[] { j+2, i+1 });
+                pseudoLegalMoves.add(new int[] { j+2, i+1 });
             }
             if (i+2<=7 && j+1<=7 && (chessBoardPieces[j+1][i+2] == ' ' || isOppositePiece(pieceColour,j+1,i+2))){ // se
-                legalMoves.add(new int[] { j+1, i+2 });
+                pseudoLegalMoves.add(new int[] { j+1, i+2 });
             }
             if (i+2<=7 && j-1>=0 && (chessBoardPieces[j-1][i+2] == ' ' || isOppositePiece(pieceColour,j-1,i+2))){ // sw
-                legalMoves.add(new int[] { j-1, i+2 });
+                pseudoLegalMoves.add(new int[] { j-1, i+2 });
             }
             if (i+1<=7 && j-2>=0 && (chessBoardPieces[j-2][i+1] == ' ' || isOppositePiece(pieceColour,j-2,i+1))){ // ws
-                legalMoves.add(new int[] { j-2, i+1 });
+                pseudoLegalMoves.add(new int[] { j-2, i+1 });
             }
             if (i-1>=0 && j-2>=0 && (chessBoardPieces[j-2][i-1] == ' ' || isOppositePiece(pieceColour,j-2,i-1))){ // wn
-                legalMoves.add(new int[] { j-2, i-1 });
+                pseudoLegalMoves.add(new int[] { j-2, i-1 });
             }
+        }
+
+        for (int[] move : pseudoLegalMoves) {
+            System.out.println(move[0]);
+            legalMoves.add(move);
         }
     }
 
@@ -524,7 +531,7 @@ public class Board {
                             int[] playerMove = new int[] { j, i };
                             for (int k = 0; k < legalMoves.size(); k++) {
                                 if (Arrays.compare(playerMove,legalMoves.get(k)) == 0) {
-                                    movePiece(playerSelectedPiece[0],playerSelectedPiece[1],j,i);
+                                    movePiece(chessBoardPieces,playerSelectedPiece[0],playerSelectedPiece[1],j,i);
                                 }
                                 
                             }
