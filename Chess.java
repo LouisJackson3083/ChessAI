@@ -80,7 +80,7 @@ public class Chess {
         // FEN BASICS
         // Placement field / whose move it is / castling / en passant / draw legalMoves
         //loadFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        loadFromFEN("8/8/8/2k2K/8/8/8/8 w KQkq - 0 1");
+        loadFromFEN("8/8/8/1kN1R3/8/8/8/8 w KQkq - 0 1");
         board.setTurnColour(0); // Set turn to black
     }
 
