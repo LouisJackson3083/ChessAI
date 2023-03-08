@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class PlayerMoves {
     
@@ -7,6 +8,7 @@ public class PlayerMoves {
         char piece = board.getPiece(j, i);
         if (piece == ' ') { return moves; }
         int pieceColour = board.getPieceColourOfChar(piece);
+        char king = (pieceColour == 0) ? 'K' : 'k';
 
         if (board.getTurnColour() == pieceColour) {
             
@@ -30,20 +32,36 @@ public class PlayerMoves {
             }
         }
 
-        // for (Move move : moves) { // Now check if these are legal moves
-        //     ChessPieces boardCopy = new ChessPieces(board);
-        //     boardCopy.makePlayerMove(move);
-
-
-        //     ArrayList<Move> enemyMoves = new ArrayList<Move>();
-        //     enemyMoves = generateEnemyMoves(pieceColour, boardCopy);
-        //     for (Move enemyMove : enemyMoves) {
-        //         if (pieceColour == board.getPieceColour(enemyMove.getTargetSquare()[0], enemyMove.getTargetSquare()[1])) {
-        //             System.out.printf("\nILLEGAL %d,%d, %s(%d,%d)",move.getTargetSquare()[0],move.getTargetSquare()[1],board.getPiece(j, i),j,i);
-        //         }
-        //     }
-        // }
+        int enemyColour = (pieceColour == 0) ? 1 : 0;
+        Iterator<Move> moveCheck = moves.iterator();
+        while(moveCheck.hasNext()) { // Now check if these are legal moves
+            Move move = moveCheck.next();
+            System.out.printf("\n%s %s(%d,%d) to (%d,%d) \n",(pieceColour == 0) ? "black move: " : "white move: ",board.getPiece(j, i),j,i,move.getTargetSquare()[0],move.getTargetSquare()[1]);
         
+            ChessPieces boardCopy = new ChessPieces();
+
+            for (int x = 0; x < 8; x++) {
+                for (int y = 0; y < 8; y++) {
+                    boardCopy.setPiece(y, x, board.getPiece(y, x));
+                }
+            }
+            boardCopy.makePlayerMove(move);
+            boardCopy.setTurnColour((pieceColour == 0) ? 1 : 0);
+            boardCopy.boardPrint();
+
+            ArrayList<Move> enemyMoves = new ArrayList<Move>();
+            enemyMoves = generateEnemyMoves(boardCopy);
+            System.out.println(enemyMoves.size());
+            // for (Move enemyMove : enemyMoves) {
+
+            //     System.out.printf("\n%s %s(%d,%d) to (%d,%d) ",(enemyColour == 0) ? "black move: " : "white move: ",boardCopy.getPiece(enemyMove.getStartSquare()[0], enemyMove.getStartSquare()[1]),enemyMove.getStartSquare()[0],enemyMove.getStartSquare()[1],enemyMove.getTargetSquare()[0],enemyMove.getTargetSquare()[1]);
+            //     if (king == board.getPiece(enemyMove.getTargetSquare()[0], enemyMove.getTargetSquare()[1])) {
+            //         System.out.printf("\nILLEGAL");
+            //         moveCheck.remove();
+            //     }
+            // }
+        }
+
         return moves;
     }
 
@@ -234,12 +252,14 @@ public class PlayerMoves {
         return moves;
     }
 
-    public ArrayList<Move> generateEnemyMoves(int turnColour, ChessPieces board) {
+    public ArrayList<Move> generateEnemyMoves(ChessPieces board) {
         ArrayList<Move> moves = new ArrayList<Move>();
+        int turnColour = board.getTurnColour();
 
         for ( int j = 0; j < 8; j++ ) {
             for ( int i = 0; i < 8; i++ ) {
-                if (board.getPiece(j, i) != ' ') {
+                if (board.getPiece(j, i) != ' ' && board.getPieceColour(j, i) == turnColour) {
+                    System.out.printf("\nADDING MOVES FOR %s at (%d,%d)", board.getPiece(j, i),j,i);
                     moves.addAll(generateMovesForEnemyPiece(j, i, board));
                 }
             }

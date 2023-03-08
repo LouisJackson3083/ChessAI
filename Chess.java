@@ -61,12 +61,12 @@ public class Chess {
 
         gui.resetBoardBackgrounds();
         ArrayList<Move> moves = new PlayerMoves().generateMovesForPiece(j, i, board);
-        board.boardPrint();
-        System.out.printf("\n%s @ %d,%d",(board.getPiece(j, i) == ' ') ? 'E' : board.getPiece(j, i),j,i);
+        //board.boardPrint();
+        //System.out.printf("\n%s @ %d,%d",(board.getPiece(j, i) == ' ') ? 'E' : board.getPiece(j, i),j,i);
         
         for (Move move : moves) {
             gui.highlightSquare(move.getTargetSquare()[0],move.getTargetSquare()[1]);
-            System.out.printf("\n%d,%d, %s(%d,%d)",move.getTargetSquare()[0],move.getTargetSquare()[1],board.getPiece(j, i),j,i);
+            //System.out.printf("\n%d,%d, %s(%d,%d)",move.getTargetSquare()[0],move.getTargetSquare()[1],board.getPiece(j, i),j,i);
         }
 
         playerMoves = moves;
@@ -79,7 +79,8 @@ public class Chess {
 
         // FEN BASICS
         // Placement field / whose move it is / castling / en passant / draw legalMoves
-        loadFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        //loadFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        loadFromFEN("8/8/8/2k2K/8/8/8/8 w KQkq - 0 1");
         board.setTurnColour(0); // Set turn to black
     }
 
@@ -100,7 +101,7 @@ public class Chess {
                         gui.setPieceIcon(file+k, rank, ' ');
                         board.setBlank(file+k, rank);
                     }
-                    file += Character.getNumericValue(currentChar);
+                    file += Character.getNumericValue(currentChar)-1;
                 }
                 else {
                     gui.setPieceIcon(file, rank, currentChar);

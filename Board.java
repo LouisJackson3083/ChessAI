@@ -327,7 +327,7 @@ public class Board {
             boolean nw = true, ne = true, sw = true, se = true;
             for (int k = 1; k < 8; k++) {
                 if (nw && j-k>=0 && i-k>=0) { // Check the north west squares
-                    if (chessBoardPieces[j-k][i-k] == ' '){
+                    if (chessBoardPieces[j-k][i-k] == ' '){ 
                         pseudoLegalMoves.add(new int[] { j-k, i-k });
                     }
                     else if (isOppositePiece(pieceColour,j-k,i-k)) {

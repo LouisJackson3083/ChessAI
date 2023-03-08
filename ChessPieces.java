@@ -64,4 +64,5 @@ public class ChessPieces {
         setPiece(move.getTargetSquare()[0],move.getTargetSquare()[1],getPiece(move.getStartSquare()[0],move.getStartSquare()[1]));
         setBlank(move.getStartSquare()[0],move.getStartSquare()[1]);
     }
+
 }
