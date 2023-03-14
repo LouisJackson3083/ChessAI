@@ -42,12 +42,13 @@ public class PlayerMoves {
                 }
             }
             boardCopy.makePlayerMove(move);
-            boardCopy.setTurnColour((pieceColour == 0) ? 1 : 0);
+            boardCopy.setTurnColour((pieceColour == 0) ? 1 : 0);    
 
             ArrayList<Move> enemyMoves = new ArrayList<Move>();
             enemyMoves = generateEnemyMoves(boardCopy);
             for (Move enemyMove : enemyMoves) {
                 if ( boardCopy.getPiece(enemyMove.getTargetSquare()[0], enemyMove.getTargetSquare()[1]) == king ) {
+                    System.out.printf("\n%d,%d",enemyMove.getTargetSquare()[0], enemyMove.getTargetSquare()[1]);
                     moveCheck.remove();
                 }
             }
